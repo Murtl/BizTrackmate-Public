@@ -1,0 +1,21 @@
+<template>
+  <svg
+    width="25"
+    height="20"
+    viewBox="0 0 20 16"
+    xmlns="http://www.w3.org/2000/svg"
+    class="btm-icon-host"
+  >
+    <path
+      d="M16 4c0 0 0-1-1-2s-1.9-1-1.9-1l-1.1 1.1v-2.1h-12v16h12v-8l4-4zM6.3 11.4l-0.6-0.6 0.3-1.1 1.5 1.5-1.2 0.2zM7.2 9.5l-0.6-0.6 5.2-5.2c0.2 0.1 0.4 0.3 0.6 0.5zM14.1 2.5l-0.9 1c-0.2-0.2-0.4-0.3-0.6-0.5l0.9-0.9c0.1 0.1 0.3 0.2 0.6 0.4zM11 15h-10v-14h10v2.1l-5.9 5.9-1.1 4.1 4.1-1.1 2.9-3v6z"
+    ></path>
+  </svg>
+</template>
+
+<style scoped lang="scss">
+@import '@/custom';
+
+.btm-icon-host {
+  fill: $primary;
+}
+</style>

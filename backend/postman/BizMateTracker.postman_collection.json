@@ -1,0 +1,860 @@
+{
+	"info": {
+		"_postman_id": "03030478-9e9f-441e-97af-3c7deb0e5d99",
+		"name": "BizMateTracker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26848780"
+	},
+	"item": [
+		{
+			"name": "Utils",
+			"item": [
+				{
+					"name": "200 - Firebase idToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get token from Firebase\", function() {",
+									"    var jsonData = JSON.parse(responseBody);",
+									"    pm.collectionVariables.set(\"USER_FIREBASE_ID_TOKEN\", jsonData.idToken);",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"{{USER_EMAIL}}\",\n    \"password\" : \"{{USER_PASSWORD}}\",\n    \"returnSecureToken\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={{FIREBASE_API_TOKEN}}",
+							"protocol": "https",
+							"host": [
+								"www",
+								"googleapis",
+								"com"
+							],
+							"path": [
+								"identitytoolkit",
+								"v3",
+								"relyingparty",
+								"verifyPassword"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "{{FIREBASE_API_TOKEN}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "201 - Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function() {",
+									"    var jsonData = JSON.parse(responseBody);",
+									"    pm.collectionVariables.set(\"USER_ID\", jsonData.uid);",
+									"    pm.collectionVariables.set(\"USER_STORE_ID\", jsonData.storeId);",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"email\": \"{{USER_EMAIL}}\",\n    \"password\": \"{{USER_PASSWORD}}\",\n    \"confirmPassword\" : \"{{USER_CONFIRM_PASSWORD}}\",\n    \"disabled\" : false,\n    \"displayName\" : \"{{USER_DISPLAYNAME}}\",\n    \"storeName\" : \"{{USER_STORENAME}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/users",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"port": "{{SERVER_PORT}}",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - Get User Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function() {",
+									"    var jsonData = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.collectionVariables.set(\"USER_STORE_ID\", jsonData.storeId);",
+									"    pm.expect(jsonData.msg).to.eql(\"You are authorized!\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{USER_FIREBASE_ID_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/users",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"port": "{{SERVER_PORT}}",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inventar",
+			"item": [
+				{
+					"name": "Artikelgruppen",
+					"item": [
+						{
+							"name": "201 - Create Artikelgruppe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.collectionVariables.set(\"ARTICLE_GROUP_ID\", jsonData.groupDocId);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupId\" : \"GRP-1\",\n    \"groupName\" : \"Biere\",\n    \"groupType\" : \"Food\",\n    \"currentStock\" : \"0\",\n    \"description\" : \"Alle Biere werden dieser Artikelgruppe zugeordnet.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articlegroups",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articlegroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "201 - Update Artikelgruppe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupId\" : \"GRP-1\",\n    \"groupName\" : \"Softdrinks\",\n    \"groupType\" : \"Food\",\n    \"currentStock\" : \"0\",\n    \"description\" : \"Alle Softdrinks werden dieser Artikelgruppe zugeordnet.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articlegroups/{{ARTICLE_GROUP_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articlegroups",
+										"{{ARTICLE_GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get All Artikelgruppen",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articlegroups",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articlegroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get Artikelgruppe",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articlegroups/{{ARTICLE_GROUP_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articlegroups",
+										"{{ARTICLE_GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Delete Artikelgruppe",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articlegroups/{{ARTICLE_GROUP_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articlegroups",
+										"{{ARTICLE_GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Lagerplatz",
+					"item": [
+						{
+							"name": "201 - Create Lagerplatz",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.collectionVariables.set(\"STORAGE_SPACE_ID\", jsonData.storageSpaceDocId);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"storageSpaceId\" : \"L-001\",\n    \"storageSpaceName\" : \"Regal\",\n    \"storageSpaceType\" : \"RE\",\n    \"description\" : \"Hochregal mit 20 Fächern.\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "201 - Update Artikelgruppe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"storageSpaceId\" : \"L-001\",\n    \"storageSpaceName\" : \"Raum\",\n    \"storageSpaceType\" : \"RA\",\n    \"description\" : \"Raum im Keller\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces/{{STORAGE_SPACE_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces",
+										"{{STORAGE_SPACE_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get All Artikelgruppen",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get Artikelgruppe",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces/{{STORAGE_SPACE_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces",
+										"{{STORAGE_SPACE_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Delete Artikelgruppe",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces/{{STORAGE_SPACE_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces",
+										"{{STORAGE_SPACE_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Artikel",
+					"item": [
+						{
+							"name": "201 - Create Artikel",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.collectionVariables.set(\"ARTICLE_DOC_ID\", jsonData.articleDocId);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"articleId\" : \"A-001\",\n    \"name\" : \"Sprite 0,5 L\",\n    \"price\" : \"3.20\",\n    \"stock\" : \"0\",\n    \"articleGroup\" : {\n        \"groupDocId\" : \"{{ARTICLE_GROUP_ID}}\",\n        \"groupId\" : \"GRP-1\",\n        \"groupName\" : \"Biere\",\n        \"groupType\" : \"Food\",\n        \"currentStock\" : \"0\",\n        \"description\" : \"Alle Biere werden dieser Artikelgruppe zugeordnet.\"\n    },\n    \"storageSpace\" : {\n        \"storageSpaceDocId\" : \"{{STORAGE_SPACE_ID}}\",\n        \"storageSpaceId\" : \"L-001\",\n        \"storageSpaceName\" : \"Regal\",\n        \"storageSpaceType\" : \"RE\",\n        \"description\" : \"Hochregal mit 20 Fächern.\"\n    },\n    \"description\" : \"Das ist ein Beispiel\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articles",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "201 - Update Artikel",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"articleId\" : \"A-001\",\n    \"name\" : \"Cola 0,5 L\",\n    \"price\" : \"2.20\",\n    \"stock\" : \"0\",\n    \"articleGroup\" : {\n        \"groupDocId\" : \"{{ARTICLE_GROUP_ID}}\",\n        \"groupId\" : \"GRP-1\",\n        \"groupName\" : \"Biere\",\n        \"groupType\" : \"Food\",\n        \"currentStock\" : \"0\",\n        \"description\" : \"Alle Biere werden dieser Artikelgruppe zugeordnet.\"\n    },\n    \"storageSpace\" : {\n        \"storageSpaceDocId\" : \"{{STORAGE_SPACE_ID}}\",\n        \"storageSpaceId\" : \"L-001\",\n        \"storageSpaceName\" : \"Regal\",\n        \"storageSpaceType\" : \"RE\",\n        \"description\" : \"Hochregal mit 20 Fächern.\"\n    },\n    \"description\" : \"Das ist ein Beispiel\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articles/{{ARTICLE_DOC_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articles",
+										"{{ARTICLE_DOC_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get All Artikel",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articles",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Get Artikel",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/storagespaces/{{STORAGE_SPACE_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"storagespaces",
+										"{{STORAGE_SPACE_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "200 - Delete Artikel",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/articles/{{ARTICLE_DOC_ID}}",
+									"host": [
+										"{{SERVER_URL}}"
+									],
+									"port": "{{SERVER_PORT}}",
+									"path": [
+										"api",
+										"stores",
+										"{{USER_STORE_ID}}",
+										"articles",
+										"{{ARTICLE_DOC_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{USER_FIREBASE_ID_TOKEN}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Transaktionen",
+			"item": [
+				{
+					"name": "200 - Get All Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/transactions",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"port": "{{SERVER_PORT}}",
+							"path": [
+								"api",
+								"stores",
+								"{{USER_STORE_ID}}",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 - Delete Transaktion",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_URL}}:{{SERVER_PORT}}/api/stores/{{USER_STORE_ID}}/transactions/hierTransactionsDocIdeintragen",
+							"host": [
+								"{{SERVER_URL}}"
+							],
+							"port": "{{SERVER_PORT}}",
+							"path": [
+								"api",
+								"stores",
+								"{{USER_STORE_ID}}",
+								"transactions",
+								"hierTransactionsDocIdeintragen"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{USER_FIREBASE_ID_TOKEN}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SERVER_URL",
+			"value": "http://localhost",
+			"type": "string"
+		},
+		{
+			"key": "SERVER_PORT",
+			"value": "3000",
+			"type": "string"
+		},
+		{
+			"key": "FIREBASE_API_TOKEN",
+			"value": "AIzaSyCbTVIUcc4EnXb-vUcyUPdlsPj9j7Ipy8I",
+			"type": "string"
+		},
+		{
+			"key": "USER_FIREBASE_ID_TOKEN",
+			"value": ""
+		},
+		{
+			"key": "USER_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "USER_EMAIL",
+			"value": "postman@test.com",
+			"type": "string"
+		},
+		{
+			"key": "USER_PASSWORD",
+			"value": "Postman123!",
+			"type": "string"
+		},
+		{
+			"key": "USER_CONFIRM_PASSWORD",
+			"value": "Postman123!",
+			"type": "string"
+		},
+		{
+			"key": "USER_DISPLAYNAME",
+			"value": "Postman User",
+			"type": "string"
+		},
+		{
+			"key": "USER_STORENAME",
+			"value": "Store XYZ",
+			"type": "string"
+		},
+		{
+			"key": "STORE_ID",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "ITEM_ID",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "USER_STORE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ARTICLE_GROUP_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "STORAGE_SPACE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ARTICLE_DOC_ID",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

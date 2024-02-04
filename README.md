@@ -11,7 +11,7 @@ Naming Conventions:
 
 If you want to run it, follow these steps:
 - clone the repo
-  `git clone https://github.com/Murtl/aluco-dashboard.git`
+  `git clone https://github.com/Murtl/BizTrackMate-Public.git`
 - go into backend folder
   `cd backend`
 - run npm install
@@ -24,5 +24,10 @@ If you want to run it, follow these steps:
   `npm install`
 - run npm run dev (start localhost to look at it)
   `npm run dev`
+
+Please note that you need to replace the placeholders in the following files with your firebase project information to run the project yourself:
+- frontend/src/firebase.ts
+- backend/src/firebase-service-account.json
+- backend/config/test.ts
 
 
