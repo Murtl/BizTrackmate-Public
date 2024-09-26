@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { BTMAuthService } from '@/services/BTMAuthService'
 import dynamicText from '@/text/dynamicText.json'
 import BTMRegister from '@/views/auth/BTMRegister.vue'
+import {useUserStore} from "@/stores/userStore";
+import {storeToRefs} from "pinia";
 
 const email = ref('')
 const password = ref('')
@@ -12,6 +14,8 @@ const showDefaultModal = ref(false)
 const defaultModalText = ref('')
 
 const loginRef = ref<HTMLDivElement>()
+
+const userStore = useUserStore();
 
 const loginButtonDisabledState = computed(() => {
   return email.value === '' || password.value === ''

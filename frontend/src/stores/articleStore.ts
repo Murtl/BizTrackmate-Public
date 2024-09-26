@@ -3,8 +3,7 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { BTMArticle } from '@/utils/types/btmArticle'
 import { useShopNameStore } from '@/stores/shopNameStore'
-import axios from 'axios'
-import { getAuth } from 'firebase/auth'
+import { v4 as uuidv4 } from 'uuid'
 
 export const useArticleStore = defineStore('articleStore', () => {
   const articles: Ref<BTMArticle[]> = ref([])
@@ -16,23 +15,7 @@ export const useArticleStore = defineStore('articleStore', () => {
   const fetchArticles = async () => {
     if (articles.value.length === 0) {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articles`,
-          {
-            headers: {
-              Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-            }
-          }
-        )
-        const parsedArticles = response.data as BTMArticle[]
-        parsedArticles.forEach((article) => {
-          article.stock = parseInt(article.stock.toString())
-          article.price = parseInt(article.price.toString())
-          article.articleGroup.currentStock = parseInt(article.articleGroup.currentStock.toString())
-        })
-        articles.value = (response.data as BTMArticle[]).sort((a, b) =>
-          parseInt(a.articleId.substring(2)) > parseInt(b.articleId.substring(2)) ? 1 : -1
-        )
+        articles.value = []
       } catch (e) {
         articles.value = []
         console.log(e)
@@ -54,31 +37,7 @@ export const useArticleStore = defineStore('articleStore', () => {
    */
   const addArticle = async (article: BTMArticle): Promise<{ state: boolean; message: string }> => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articles`,
-        {
-          articleId: article.articleId,
-          name: article.name,
-          price: article.price,
-          stock: article.stock.toString(),
-          articleGroup: {
-            groupDocId: article.articleGroup.groupDocId,
-            groupId: article.articleGroup.groupId,
-            groupName: article.articleGroup.groupName,
-            groupType: article.articleGroup.groupType,
-            currentStock: article.articleGroup.currentStock.toString(),
-            description: article.articleGroup.description
-          },
-          storageSpace: article.storageSpace,
-          description: article.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
-      article.articleDocId = response.data.articleDocId
+      article.articleDocId = uuidv4()
       articles.value.push(Object.assign({}, article))
       return { state: true, message: '' }
     } catch (e) {
@@ -96,14 +55,6 @@ export const useArticleStore = defineStore('articleStore', () => {
     articleDocId: string
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.delete(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articles/${articleDocId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = articles.value.findIndex((article) => article.articleDocId === articleDocId)
       articles.value.splice(index, 1)
       return { state: true, message: '' }
@@ -121,32 +72,6 @@ export const useArticleStore = defineStore('articleStore', () => {
     article: BTMArticle
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.put(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articles/${
-          article.articleDocId
-        }`,
-        {
-          articleId: article.articleId,
-          name: article.name,
-          price: article.price,
-          stock: article.stock.toString(),
-          articleGroup: {
-            groupDocId: article.articleGroup.groupDocId,
-            groupId: article.articleGroup.groupId,
-            groupName: article.articleGroup.groupName,
-            groupType: article.articleGroup.groupType,
-            currentStock: article.articleGroup.currentStock.toString(),
-            description: article.articleGroup.description
-          },
-          storageSpace: article.storageSpace,
-          description: article.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = articles.value.findIndex((a) => a.articleDocId === article.articleDocId)
       articles.value[index] = article
       return { state: true, message: '' }

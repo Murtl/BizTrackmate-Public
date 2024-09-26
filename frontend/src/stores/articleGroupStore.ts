@@ -3,8 +3,7 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { BTMArticleGroup } from '@/utils/types/btmArticleGroup'
 import { useShopNameStore } from '@/stores/shopNameStore'
-import axios from 'axios'
-import { getAuth } from 'firebase/auth'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * This is the store for article groups.
@@ -19,21 +18,7 @@ export const useArticleGroupStore = defineStore('articleGroupStore', () => {
   const fetchArticleGroups = async () => {
     if (articleGroups.value.length === 0) {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articlegroups`,
-          {
-            headers: {
-              Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-            }
-          }
-        )
-        const parsedArticleGroups = response.data as BTMArticleGroup[]
-        parsedArticleGroups.forEach((articleGroup) => {
-          articleGroup.currentStock = parseInt(articleGroup.currentStock.toString())
-        })
-        articleGroups.value = (response.data as BTMArticleGroup[]).sort((a, b) =>
-          parseInt(a.groupId.substring(3)) > parseInt(b.groupId.substring(3)) ? 1 : -1
-        )
+        articleGroups.value = [];
       } catch (e) {
         articleGroups.value = []
         console.log(e)
@@ -57,22 +42,7 @@ export const useArticleGroupStore = defineStore('articleGroupStore', () => {
     articleGroup: BTMArticleGroup
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articlegroups`,
-        {
-          groupId: articleGroup.groupId,
-          groupName: articleGroup.groupName,
-          groupType: articleGroup.groupType,
-          currentStock: articleGroup.currentStock.toString(),
-          description: articleGroup.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
-      articleGroup.groupDocId = response.data.groupDocId
+      articleGroup.groupDocId = uuidv4()
       articleGroups.value.push(articleGroup)
       return { state: true, message: '' }
     } catch (e) {
@@ -89,14 +59,6 @@ export const useArticleGroupStore = defineStore('articleGroupStore', () => {
     groupDocId: string
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.delete(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articlegroups/${groupDocId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = articleGroups.value.findIndex((a) => a.groupDocId === groupDocId)
       articleGroups.value.splice(index, 1)
       return { state: true, message: '' }
@@ -114,23 +76,6 @@ export const useArticleGroupStore = defineStore('articleGroupStore', () => {
     articleGroup: BTMArticleGroup
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.put(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/articlegroups/${
-          articleGroup.groupDocId
-        }`,
-        {
-          groupId: articleGroup.groupId,
-          groupName: articleGroup.groupName,
-          groupType: articleGroup.groupType,
-          currentStock: articleGroup.currentStock.toString(),
-          description: articleGroup.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = articleGroups.value.findIndex((a) => a.groupDocId === articleGroup.groupDocId)
       articleGroups.value[index] = articleGroup
       return { state: true, message: '' }

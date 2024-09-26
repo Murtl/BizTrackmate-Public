@@ -1,28 +1,17 @@
 <script setup lang="ts">
 import BTMLogin from '@/views/auth/BTMLogin.vue'
 import BTMHome from '@/views/BTMHome.vue'
-import { onAuthStateChanged } from 'firebase/auth'
-import { getAuth } from 'firebase/auth'
-import { ref } from 'vue'
-import { useShopNameStore } from '@/stores/shopNameStore'
+import {ref} from 'vue'
+import {useUserStore} from "@/stores/userStore";
 
-const loggedIn = ref(false)
 const loading = ref(true)
-const shopNameStore = useShopNameStore()
 
-onAuthStateChanged(getAuth(), async (user) => {
-  if (user) {
-    // Benutzer ist angemeldet
-    const token = await user.getIdTokenResult()
-    shopNameStore.setShopNameAndId(token.claims.name, token.claims.storeId)
-    loading.value = false
-    loggedIn.value = true
-  } else {
-    // Benutzer ist abgemeldet
-    loading.value = false
-    loggedIn.value = false
-  }
-})
+const userStore = useUserStore();
+
+setTimeout(() => {
+  loading.value = false
+}, 200)
+
 </script>
 
 <template>
@@ -30,7 +19,7 @@ onAuthStateChanged(getAuth(), async (user) => {
     <BSpinner label="Spinning" />
   </div>
   <div v-else>
-    <BTMLogin v-if="!loggedIn" />
+    <BTMLogin v-if="!userStore.isLoggedIn" />
     <BTMHome v-else />
   </div>
 </template>

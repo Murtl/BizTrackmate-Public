@@ -7,13 +7,12 @@ import { onBeforeMount, ref } from 'vue'
 import BTMHandsUpIcon from '@/components/icons/BTMHandsUpIcon.vue'
 import BTMArrowRightIcon from '@/components/icons/BTMArrowRightIcon.vue'
 import router from '@/router'
-import { BTMAuthService } from '@/services/BTMAuthService'
-import { getCurrentUser } from '@/firebase'
 import { useShopNameStore } from '@/stores/shopNameStore'
 import { useArticleStore } from '@/stores/articleStore'
 import { useArticleGroupStore } from '@/stores/articleGroupStore'
 import { useStorageSpaceStore } from '@/stores/storageSpaceStore'
 import { useTransactionsStore } from '@/stores/transactionsStore'
+import {useUserStore} from "@/stores/userStore";
 
 const shopNameStore = useShopNameStore()
 const avatarRef = ref<HTMLElement>()
@@ -24,6 +23,7 @@ const storageSpaceStore = useStorageSpaceStore()
 const transactionsStore = useTransactionsStore()
 
 const loading = ref(true)
+const userStore = useUserStore()
 
 onBeforeMount(async () => {
   await articleStore.fetchArticles()
@@ -44,11 +44,9 @@ const handleShowAccountView = () => {
  * Logout the user
  */
 const handleLogout = () => {
+  const userStore = useUserStore()
   setTimeout(async () => {
-    const { state, message } = await BTMAuthService.logout()
-    if (!state) {
-      console.log(message)
-    }
+    userStore.logout()
     articleStore.resetArticles()
     articleGroupStore.resetArticleGroups()
     storageSpaceStore.resetStorageSpaces()
@@ -89,7 +87,7 @@ const handleLogout = () => {
             <BAvatar
               ref="avatarRef"
               variant="primary"
-              :text="getCurrentUser()?.email!.toUpperCase().substring(0, 2)"
+              :text="userStore.currentUser?.email.substring(0,2).toUpperCase()"
               :button="true"
             />
             <BPopover :target="avatarRef" placement="bottom" triggers="focus">

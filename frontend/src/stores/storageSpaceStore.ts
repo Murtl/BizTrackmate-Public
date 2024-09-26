@@ -3,8 +3,7 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { BTMStorageSpace } from '@/utils/types/btmStorageSpace'
 import { useShopNameStore } from '@/stores/shopNameStore'
-import axios from 'axios'
-import { getAuth } from 'firebase/auth'
+import { v4 as uuidv4 } from 'uuid'
 
 export const useStorageSpaceStore = defineStore('storageSpaceStore', () => {
   const storageSpaces: Ref<BTMStorageSpace[]> = ref([])
@@ -16,17 +15,7 @@ export const useStorageSpaceStore = defineStore('storageSpaceStore', () => {
   const fetchStorageSpaces = async () => {
     if (storageSpaces.value.length === 0) {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/storagespaces`,
-          {
-            headers: {
-              Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-            }
-          }
-        )
-        storageSpaces.value = (response.data as BTMStorageSpace[]).sort((a, b) =>
-          parseInt(a.storageSpaceId.substring(2)) > parseInt(b.storageSpaceId.substring(2)) ? 1 : -1
-        )
+        storageSpaces.value = []
       } catch (e) {
         storageSpaces.value = []
         console.log(e)
@@ -50,23 +39,9 @@ export const useStorageSpaceStore = defineStore('storageSpaceStore', () => {
     storageSpace: BTMStorageSpace
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      const response = await axios.post(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/storagespaces`,
-        {
-          storageSpaceId: storageSpace.storageSpaceId,
-          storageSpaceName: storageSpace.storageSpaceName,
-          storageSpaceType: storageSpace.storageSpaceType,
-          description: storageSpace.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
-      storageSpace.storageSpaceDocId = response.data.storageSpaceDocId
+      storageSpace.storageSpaceDocId = uuidv4()
       storageSpaces.value.push(storageSpace)
-      return { state: true, message: response.data }
+      return { state: true, message: ''}
     } catch (e) {
       return { state: false, message: e as string }
     }
@@ -81,14 +56,6 @@ export const useStorageSpaceStore = defineStore('storageSpaceStore', () => {
     storageSpaceDocId: string
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.delete(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/storagespaces/${storageSpaceDocId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = storageSpaces.value.findIndex((a) => a.storageSpaceDocId === storageSpaceDocId)
       storageSpaces.value.splice(index, 1)
       return { state: true, message: 'success' }
@@ -106,22 +73,6 @@ export const useStorageSpaceStore = defineStore('storageSpaceStore', () => {
     storageSpace: BTMStorageSpace
   ): Promise<{ state: boolean; message: string }> => {
     try {
-      await axios.put(
-        `http://localhost:3000/api/stores/${shopNameStore.getShopId()}/storagespaces/${
-          storageSpace.storageSpaceDocId
-        }`,
-        {
-          storageSpaceId: storageSpace.storageSpaceId,
-          storageSpaceName: storageSpace.storageSpaceName,
-          storageSpaceType: storageSpace.storageSpaceType,
-          description: storageSpace.description
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${(await getAuth().currentUser?.getIdToken()) as string}`
-          }
-        }
-      )
       const index = storageSpaces.value.findIndex(
         (a) => a.storageSpaceId === storageSpace.storageSpaceId
       )

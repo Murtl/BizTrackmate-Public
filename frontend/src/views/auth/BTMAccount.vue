@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed,  ref } from 'vue'
 import BTMCheckIcon from '@/components/icons/BTMCheckIcon.vue'
 import dynamicText from '@/text/dynamicText.json'
 import { BTMAuthService } from '@/services/BTMAuthService'
-import { getCurrentUser } from '@/firebase'
 
 const currentEmail = ref('')
 const newEmail = ref('')
@@ -16,13 +15,6 @@ const defaultModalText = ref('')
 
 const showPasswordModal = ref(false)
 const passwordInput = ref('')
-
-onBeforeMount(() => {
-  const user = getCurrentUser()
-  if (user && typeof user.email === 'string') {
-    currentEmail.value = user.email
-  }
-})
 
 const saveMailButtonDisabledState = computed(() => {
   return newEmail.value === ''
@@ -72,19 +64,6 @@ const handleSaveNewPassword = async () => {
   showDefaultModal.value = true
 }
 
-/**
- * Reauthenticates the user and changes the mail
- */
-const handleReauthenticateAndChangeMail = async () => {
-  const { state, message } = await BTMAuthService.reauthenticate(passwordInput.value)
-  if (state) {
-    passwordInput.value = ''
-    await handleSaveNewEMail()
-  } else {
-    defaultModalText.value = message
-    showDefaultModal.value = true
-  }
-}
 </script>
 
 <template>
@@ -149,7 +128,7 @@ const handleReauthenticateAndChangeMail = async () => {
     v-model="showPasswordModal"
     :title="dynamicText.E_Mail_change_requires_password"
     :ok-only="true"
-    @ok="handleReauthenticateAndChangeMail"
+    @ok="handleSaveNewEMail"
   >
     <BFormInput
       v-model="passwordInput"
